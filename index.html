@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Rental Mobil</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef0f2;--panel:#fff;--ink:#1c2530;--mute:#66717d;--line:#d8dde2;--side:#1c2530;--accent:#f2b705;--accent-ink:#1c2530;--ok:#1f8a4c;--bad:#c23b3b}
+@media (prefers-color-scheme:dark){:root{--bg:#141a21;--panel:#1d252e;--ink:#e8ecef;--mute:#98a3ae;--line:#2d3844;--side:#0e1318}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;margin:0;letter-spacing:.3px}
+button,input,select{font:inherit}
+.hidden{display:none!important}
+/* login */
+#login{min-height:100vh;display:grid;place-items:center;padding:16px}
+.login-box{background:var(--panel);width:100%;max-width:380px;padding:32px;border-radius:6px;border-top:6px solid var(--accent)}
+.login-box h1{font-size:30px}
+.login-box p{color:var(--mute);margin:4px 0 20px}
+/* layout */
+#app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+aside{background:var(--side);color:#e8ecef;padding:20px 0;position:sticky;top:0;height:100vh}
+aside h2{font-size:24px;padding:0 20px 18px;color:var(--accent)}
+aside button.nav{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;padding:12px 20px;cursor:pointer;border-left:4px solid transparent}
+aside button.nav:hover{background:rgba(255,255,255,.06)}
+aside button.nav.on{border-left-color:var(--accent);background:rgba(255,255,255,.08);font-weight:600}
+aside .out{position:absolute;bottom:20px;left:20px;right:20px}
+main{padding:24px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font-size:30px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:6px;padding:14px 16px}
+.stat b{display:block;font-family:"Barlow Condensed";font-size:32px}
+.stat span{color:var(--mute)}
+.tools{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.tools input{flex:1;min-width:160px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink)}
+label{display:block;margin:12px 0 4px;font-weight:500}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;padding:9px 16px;border-radius:4px;font-weight:600;cursor:pointer}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.del{background:var(--bad);color:#fff}
+.btn:focus-visible,input:focus-visible,select:focus-visible,aside button:focus-visible{outline:3px solid #3b82f6;outline-offset:1px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:600;font-size:13px}
+td.act{display:flex;gap:6px}
+.tag{padding:2px 9px;border-radius:10px;font-size:12px;font-weight:600;color:#fff}
+.tag.ok{background:var(--ok)}.tag.bad{background:var(--bad)}.tag.warn{background:#b7791f}
+.empty{padding:28px;text-align:center;color:var(--mute)}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;padding:16px;z-index:10}
+#modal .box{background:var(--panel);width:100%;max-width:440px;max-height:92vh;overflow:auto;border-radius:6px;padding:22px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:4px;z-index:20}
+.err{color:var(--bad);margin-top:10px;min-height:18px}
+.total{background:var(--bg);padding:10px 12px;border-radius:4px;margin-top:12px;font-weight:600}
+@media(max-width:760px){
+ #app{grid-template-columns:1fr}
+ aside{position:static;height:auto;display:flex;overflow-x:auto;padding:0}
+ aside h2,aside .out{display:none}
+ aside button.nav{white-space:nowrap;border-left:0;border-bottom:4px solid transparent}
+ aside button.nav.on{border-bottom-color:var(--accent)}
+ main{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<section id="login">
+  <form class="login-box" id="loginForm">
+    <h1>Admin Rental Mobil</h1>
+    <p>Masuk untuk mengelola data rental.</p>
+    <label for="u">Username</label><input id="u" autocomplete="username" required>
+    <label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required>
+    <div class="err" id="lerr"></div>
+    <button class="btn" style="width:100%;margin-top:8px">Masuk</button>
+    <p style="font-size:13px;margin:14px 0 0">Akun uji: admin / admin123</p>
+  </form>
+</section>
+
+<div id="app" class="hidden">
+  <aside>
+    <h2>RentalKu</h2>
+    <button class="nav on" data-p="dashboard">Dashboard</button>
+    <button class="nav" data-p="mobil">Data Mobil</button>
+    <button class="nav" data-p="pelanggan">Data Pelanggan</button>
+    <button class="nav" data-p="sewa">Transaksi Sewa</button>
+    <div class="out"><button class="btn sec" style="width:100%;color:#e8ecef;border-color:#4a5663" id="logout">Keluar</button></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div id="modal" class="hidden"><div class="box" id="box"></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const rp=n=>"Rp "+Number(n||0).toLocaleString("id-ID");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+Number(n));return x.toISOString().slice(0,10)};
+let db={mobil:[],pelanggan:[],sewa:[]},page="dashboard",q="";
+
+function load(){
+  try{const s=localStorage.getItem("rental_db");if(s)db=JSON.parse(s)}catch(e){}
+  if(!db.mobil.length&&!localStorage.getItem("rental_seeded")){
+    db.mobil=[
+      {id:1,plat:"B 1234 XYZ",merk:"Toyota Avanza",tahun:2021,harga:350000,status:"Tersedia"},
+      {id:2,plat:"D 5678 ABC",merk:"Honda Brio",tahun:2022,harga:300000,status:"Tersedia"},
+      {id:3,plat:"B 9021 KLM",merk:"Mitsubishi Xpander",tahun:2023,harga:450000,status:"Tersedia"}];
+    db.pelanggan=[{id:1,nama:"Budi Santoso",nik:"3171010101900001",hp:"081234567890",alamat:"Jakarta Selatan"}];
+    try{localStorage.setItem("rental_seeded","1")}catch(e){}
+    save();
+  }
+}
+function save(){try{localStorage.setItem("rental_db",JSON.stringify(db))}catch(e){}}
+const nextId=a=>a.reduce((m,x)=>Math.max(m,x.id),0)+1;
+function toast(t){const d=document.createElement("div");d.id="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2000)}
+
+/* auth */
+$("#loginForm").onsubmit=e=>{e.preventDefault();
+  if($("#u").value==="admin"&&$("#p").value==="admin123"){
+    try{sessionStorage.setItem("adm","1")}catch(e){}
+    start()}else $("#lerr").textContent="Username atau password salah."};
+$("#logout").onclick=()=>{try{sessionStorage.removeItem("adm")}catch(e){}location.reload()};
+function start(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");load();render()}
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{page=b.dataset.p;q="";
+  document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("on",x===b));render()});
+
+/* modal */
+function openModal(html){$("#box").innerHTML=html;$("#modal").classList.remove("hidden");const f=$("#box input,#box select");f&&f.focus()}
+function closeModal(){$("#modal").classList.add("hidden")}
+$("#modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+
+/* render */
+function render(){({dashboard,mobil,pelanggan,sewa})[page]()}
+function head(t,btn){return `<div class="top"><h1>${t}</h1>${btn?`<button class="btn" id="add">${btn}</button>`:""}</div>`}
+function search(ph){return `<div class="tools"><input id="q" placeholder="${ph}" value="${esc(q)}" aria-label="Cari"></div>`}
+function bindSearch(){const i=$("#q");if(!i)return;i.oninput=()=>{q=i.value;const p=i.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(p,p)}}
+const match=o=>!q||Object.values(o).join(" ").toLowerCase().includes(q.toLowerCase());
+
+function dashboard(){
+  const tersedia=db.mobil.filter(m=>m.status==="Tersedia").length;
+  const aktif=db.sewa.filter(s=>s.status==="Berjalan").length;
+  const omzet=db.sewa.reduce((a,s)=>a+s.total,0);
+  const last=[...db.sewa].reverse().slice(0,5);
+  $("#main").innerHTML=head("Dashboard")+`
+  <div class="stats">
+    <div class="stat"><b>${db.mobil.length}</b><span>Total mobil</span></div>
+    <div class="stat"><b>${tersedia}</b><span>Mobil tersedia</span></div>
+    <div class="stat"><b>${aktif}</b><span>Sewa berjalan</span></div>
+    <div class="stat"><b>${rp(omzet)}</b><span>Total pendapatan</span></div>
+  </div>
+  <div class="panel"><h3 style="margin-bottom:10px">Transaksi terbaru</h3>
+  <div class="wrap">${last.length?`<table><tr><th>Pelanggan</th><th>Mobil</th><th>Tgl sewa</th><th>Total</th><th>Status</th></tr>
+  ${last.map(s=>`<tr><td>${esc(s.pelanggan)}</td><td>${esc(s.mobil)}</td><td>${s.tgl}</td><td>${rp(s.total)}</td><td>${tag(s.status)}</td></tr>`).join("")}</table>`:`<div class="empty">Belum ada transaksi. Buka menu Transaksi Sewa untuk menambah.</div>`}</div></div>`;
+}
+const tag=s=>`<span class="tag ${s==="Tersedia"||s==="Selesai"?"ok":s==="Berjalan"?"warn":"bad"}">${s}</span>`;
+
+/* mobil */
+function mobil(){
+  const rows=db.mobil.filter(match);
+  $("#main").innerHTML=head("Data Mobil","+ Tambah mobil")+search("Cari plat, merk...")+`<div class="panel wrap">${rows.length?`<table>
+  <tr><th>Plat</th><th>Merk / Tipe</th><th>Tahun</th><th>Harga / hari</th><th>Status</th><th>Aksi</th></tr>
+  ${rows.map(m=>`<tr><td>${esc(m.plat)}</td><td>${esc(m.merk)}</td><td>${m.tahun}</td><td>${rp(m.harga)}</td><td>${tag(m.status)}</td>
+  <td class="act"><button class="btn sec sm" data-e="${m.id}">Ubah</button><button class="btn del sm" data-d="${m.id}">Hapus</button></td></tr>`).join("")}</table>`:`<div class="empty">Data mobil kosong. Klik "Tambah mobil".</div>`}</div>`;
+  bindSearch();$("#add").onclick=()=>formMobil();
+  document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>formMobil(+b.dataset.e));
+  document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{
+    const id=+b.dataset.d;
+    if(db.sewa.some(s=>s.mobilId===id&&s.status==="Berjalan"))return toast("Mobil sedang disewa, tidak bisa dihapus");
+    if(confirm("Hapus mobil ini?")){db.mobil=db.mobil.filter(m=>m.id!==id);save();render();toast("Mobil dihapus")}});
+}
+function formMobil(id){
+  const m=db.mobil.find(x=>x.id===id)||{plat:"",merk:"",tahun:new Date().getFullYear(),harga:"",status:"Tersedia"};
+  openModal(`<h3>${id?"Ubah":"Tambah"} mobil</h3><form id="f">
+  <label>Plat nomor</label><input name="plat" value="${esc(m.plat)}" required>
+  <label>Merk / tipe</label><input name="merk" value="${esc(m.merk)}" required>
+  <div class="row"><div><label>Tahun</label><input name="tahun" type="number" min="1990" max="2100" value="${m.tahun}" required></div>
+  <div><label>Harga / hari (Rp)</label><input name="harga" type="number" min="0" value="${m.harga}" required></div></div>
+  <label>Status</label><select name="status"><option ${m.status==="Tersedia"?"selected":""}>Tersedia</option><option ${m.status==="Disewa"?"selected":""}>Disewa</option><option ${m.status==="Servis"?"selected":""}>Servis</option></select>
+  <div class="foot"><button type="button" class="btn sec" onclick="closeModal()">Batal</button><button class="btn">Simpan</button></div></form>`);
+  $("#f").onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));
+    d.tahun=+d.tahun;d.harga=+d.harga;
+    if(id)Object.assign(m,d);else db.mobil.push({id:nextId(db.mobil),...d});
+    save();closeModal();render();toast("Data mobil disimpan")};
+}
+
+/* pelanggan */
+function pelanggan(){
+  const rows=db.pelanggan.filter(match);
+  $("#main").innerHTML=head("Data Pelanggan","+ Tambah pelanggan")+search("Cari nama, NIK, HP...")+`<div class="panel wrap">${rows.length?`<table>
+  <tr><th>Nama</th><th>NIK</th><th>No. HP</th><th>Alamat</th><th>Aksi</th></tr>
+  ${rows.map(p=>`<tr><td>${esc(p.nama)}</td><td>${esc(p.nik)}</td><td>${esc(p.hp)}</td><td>${esc(p.alamat)}</td>
+  <td class="act"><button class="btn sec sm" data-e="${p.id}">Ubah</button><button class="btn del sm" data-d="${p.id}">Hapus</button></td></tr>`).join("")}</table>`:`<div class="empty">Belum ada pelanggan.</div>`}</div>`;
+  bindSearch();$("#add").onclick=()=>formPelanggan();
+  document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>formPelanggan(+b.dataset.e));
+  document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{
+    const id=+b.dataset.d;
+    if(db.sewa.some(s=>s.pelangganId===id&&s.status==="Berjalan"))return toast("Pelanggan masih punya sewa berjalan");
+    if(confirm("Hapus pelanggan ini?")){db.pelanggan=db.pelanggan.filter(p=>p.id!==id);save();render();toast("Pelanggan dihapus")}});
+}
+function formPelanggan(id){
+  const p=db.pelanggan.find(x=>x.id===id)||{nama:"",nik:"",hp:"",alamat:""};
+  openModal(`<h3>${id?"Ubah":"Tambah"} pelanggan</h3><form id="f">
+  <label>Nama lengkap</label><input name="nama" value="${esc(p.nama)}" required>
+  <label>NIK (16 digit)</label><input name="nik" value="${esc(p.nik)}" pattern="\\d{16}" title="Isi 16 digit angka" required>
+  <label>No. HP</label><input name="hp" value="${esc(p.hp)}" pattern="[0-9+]{8,15}" title="Isi nomor HP yang valid" required>
+  <label>Alamat</label><input name="alamat" value="${esc(p.alamat)}" required>
+  <div class="foot"><button type="button" class="btn sec" onclick="closeModal()">Batal</button><button class="btn">Simpan</button></div></form>`);
+  $("#f").onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));
+    if(id)Object.assign(p,d);else db.pelanggan.push({id:nextId(db.pelanggan),...d});
+    save();closeModal();render();toast("Data pelanggan disimpan")};
+}
+
+/* sewa */
+function sewa(){
+  const rows=[...db.sewa].reverse().filter(match);
+  $("#main").innerHTML=head("Transaksi Sewa","+ Input sewa baru")+search("Cari pelanggan, mobil, status...")+`<div class="panel wrap">${rows.length?`<table>
+  <tr><th>Pelanggan</th><th>Mobil</th><th>Tgl sewa</th><th>Tgl kembali</th><th>Total</th><th>Status</th><th>Aksi</th></tr>
+  ${rows.map(s=>`<tr><td>${esc(s.pelanggan)}</td><td>${esc(s.mobil)}</td><td>${s.tgl}</td><td>${s.kembali}</td><td>${rp(s.total)}</td><td>${tag(s.status)}</td>
+  <td class="act">${s.status==="Berjalan"?`<button class="btn sm" data-k="${s.id}">Kembalikan</button>`:""}<button class="btn del sm" data-d="${s.id}">Hapus</button></td></tr>`).join("")}</table>`:`<div class="empty">Belum ada transaksi sewa.</div>`}</div>`;
+  bindSearch();$("#add").onclick=formSewa;
+  document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{
+    const s=db.sewa.find(x=>x.id===+b.dataset.k);s.status="Selesai";
+    const m=db.mobil.find(x=>x.id===s.mobilId);if(m)m.status="Tersedia";
+    save();render();toast("Mobil sudah dikembalikan")});
+  document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{
+    const s=db.sewa.find(x=>x.id===+b.dataset.d);
+    if(confirm("Hapus transaksi ini?")){
+      if(s.status==="Berjalan"){const m=db.mobil.find(x=>x.id===s.mobilId);if(m)m.status="Tersedia"}
+      db.sewa=db.sewa.filter(x=>x!==s);save();render();toast("Transaksi dihapus")}});
+}
+function formSewa(){
+  const free=db.mobil.filter(m=>m.status==="Tersedia");
+  if(!db.pelanggan.length)return toast("Tambah data pelanggan dulu");
+  if(!free.length)return toast("Tidak ada mobil tersedia");
+  openModal(`<h3>Input sewa baru</h3><form id="f">
+  <label>Pelanggan</label><select name="pid">${db.pelanggan.map(p=>`<option value="${p.id}">${esc(p.nama)}</option>`).join("")}</select>
+  <label>Mobil (yang tersedia)</label><select name="mid">${free.map(m=>`<option value="${m.id}">${esc(m.merk)} - ${esc(m.plat)} (${rp(m.harga)}/hari)</option>`).join("")}</select>
+  <div class="row"><div><label>Tanggal sewa</label><input name="tgl" type="date" value="${today()}" required></div>
+  <div><label>Lama (hari)</label><input name="hari" type="number" min="1" value="1" required></div></div>
+  <div class="total" id="tot"></div>
+  <div class="foot"><button type="button" class="btn sec" onclick="closeModal()">Batal</button><button class="btn">Simpan sewa</button></div></form>`);
+  const f=$("#f");
+  const calc=()=>{const m=db.mobil.find(x=>x.id===+f.mid.value);const h=+f.hari.value||0;$("#tot").textContent="Total bayar: "+rp((m?m.harga:0)*h)};
+  f.mid.onchange=f.hari.oninput=calc;calc();
+  f.onsubmit=e=>{e.preventDefault();
+    const m=db.mobil.find(x=>x.id===+f.mid.value),p=db.pelanggan.find(x=>x.id===+f.pid.value),h=+f.hari.value;
+    db.sewa.push({id:nextId(db.sewa),pelangganId:p.id,pelanggan:p.nama,mobilId:m.id,mobil:m.merk+" ("+m.plat+")",
+      tgl:f.tgl.value,hari:h,kembali:addDays(f.tgl.value,h),total:m.harga*h,status:"Berjalan"});
+    m.status="Disewa";save();closeModal();render();toast("Transaksi sewa disimpan")};
+}
+
+/* init */
+let ok=false;try{ok=sessionStorage.getItem("adm")==="1"}catch(e){}
+if(ok)start();
+</script>
+</body>
+</html>
